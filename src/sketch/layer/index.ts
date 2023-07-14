@@ -31,13 +31,32 @@ export function extendLayer() {
     Object.defineProperty(target, "frameInfluence", {
         get: function () {
             let parent: Layer;
+            let parentRect;
             if ((this as Layer).type == sketch.Types.Page) {
                 return new sketch.Rectangle(0, 0, 0, 0);
             } else {
                 parent = (this as Layer).parent as Group;
+                
+                let grandParent = parent.parent
+                if (grandParent.type == sketch.Types.Page || grandParent.type == sketch.Types.Document) {
+                    parentRect = parent.frame.asCGRect()
+                } else {
+                    // @ts-ignore
+                    parentRect = parent.frame.changeBasis({ from: parent.parent }).asCGRect()
+                }
             }
-            let parentRect = parent.sketchObject.absoluteRect().rect();
-            let influenceCGRect = this.sketchObject.absoluteInfluenceRect();
+
+            let influenceCGRect;
+            {
+                // @ts-ignore
+                let request = MSExportRequest.exportRequestsFromLayerAncestry_(this.sketchObject.ancestry()).firstObject()
+                // @ts-ignore
+                let exporter = MSExporter.exporterForRequest_colorSpace_(request, nil)
+                // @ts-ignore
+                exporter.trimmedBounds()
+                // @ts-ignore
+                influenceCGRect = request.rect()
+            }
             return new sketch.Rectangle(
                 influenceCGRect.origin.x - parentRect.origin.x,
                 influenceCGRect.origin.y - parentRect.origin.y,
