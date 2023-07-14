@@ -132,7 +132,7 @@ function makeBaseLayerStyle(): Style {
 }
 
 function makeBaseTextStyle(): Style {
-    let baseStyle = new sketch.Style();
+    let baseStyle = new sketch.Style({}, sketch.Types.Text);
     baseStyle.fills = [];
     baseStyle.borders = [];
     baseStyle.alignment = sketch.Text.Alignment.center;
